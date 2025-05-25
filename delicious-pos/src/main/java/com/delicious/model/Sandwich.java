@@ -11,41 +11,17 @@ public class Sandwich implements OrderItem {
     private Size size;
     private BreadType breadType;
     private boolean toasted;
-    private List<String> meats;
-    private List<String> cheeses;
-    private List<String> regularToppings;
-    private List<String> sauces;
-    private List<String> sides;
+    private List<Topping> toppings;
 
     public Sandwich(Size size, BreadType breadType, boolean toasted) {
         this.size = size;
         this.breadType = breadType;
         this.toasted = toasted;
-        this.meats = new ArrayList<>();
-        this.cheeses = new ArrayList<>();
-        this.regularToppings = new ArrayList<>();
-        this.sauces = new ArrayList<>();
-        this.sides = new ArrayList<>();
+        this.toppings = new ArrayList<>();
     }
 
-    public void addMeat(String meat) {
-        meats.add(meat);
-    }
-
-    public void addCheese(String cheese) {
-        cheeses.add(cheese);
-    }
-
-    public void addRegularTopping(String topping) {
-        regularToppings.add(topping);
-    }
-
-    public void addSauce(String sauce) {
-        sauces.add(sauce);
-    }
-
-    public void addSide(String side) {
-        sides.add(side);
+    public void addTopping(Topping topping) {
+        toppings.add(topping);
     }
 
     @Override
@@ -57,19 +33,26 @@ public class Sandwich implements OrderItem {
             default -> 0.00;
         };
 
-        double meatPrice = switch (size) {
-            case FOUR_INCH -> meats.size() * 1.00;
-            case EIGHT_INCH -> meats.size() * 2.00;
-            case TWELVE_INCH -> meats.size() * 3.00;
-            default -> 0.00;
-        };
+        double meatPrice = 0;
+        double cheesePrice = 0;
 
-        double cheesePrice = switch (size) {
-            case FOUR_INCH -> cheeses.size() * 0.75;
-            case EIGHT_INCH -> cheeses.size() * 1.50;
-            case TWELVE_INCH -> cheeses.size() * 2.25;
-            default -> 0.00;
-        };
+        for (Topping topping : toppings) {
+            if (topping.getType() == ToppingType.MEAT) {
+                meatPrice += switch (size) {
+                    case FOUR_INCH -> topping.isExtra() ? 0.50 : 1.00;
+                    case EIGHT_INCH -> topping.isExtra() ? 1.00 : 2.00;
+                    case TWELVE_INCH -> topping.isExtra() ? 1.50 : 3.00;
+                    default -> 0.00;
+                };
+            } else if (topping.getType() == ToppingType.CHEESE) {
+                cheesePrice += switch (size) {
+                    case FOUR_INCH -> topping.isExtra() ? 0.30 : 0.75;
+                    case EIGHT_INCH -> topping.isExtra() ? 0.60 : 1.50;
+                    case TWELVE_INCH -> topping.isExtra() ? 0.90 : 2.25;
+                    default -> 0.00;
+                };
+            }
+        }
 
         return basePrice + meatPrice + cheesePrice;
     }
@@ -87,11 +70,19 @@ public class Sandwich implements OrderItem {
 
         if (toasted) sb.append(" (Toasted)");
 
-        if (!meats.isEmpty()) sb.append("\n  Meats: ").append(String.join(", ", meats));
-        if (!cheeses.isEmpty()) sb.append("\n  Cheeses: ").append(String.join(", ", cheeses));
-        if (!regularToppings.isEmpty()) sb.append("\n  Toppings: ").append(String.join(", ", regularToppings));
-        if (!sauces.isEmpty()) sb.append("\n  Sauces: ").append(String.join(", ", sauces));
-        if (!sides.isEmpty()) sb.append("\n  Sides: ").append(String.join(", ", sides));
+        for (ToppingType type : ToppingType.values()) {
+            List<String> names = new ArrayList<>();
+            for (Topping topping : toppings) {
+                if (topping.getType() == type) {
+                    String name = topping.getName();
+                    if (topping.isExtra()) name += " (extra)";
+                    names.add(name);
+                }
+            }
+            if (!names.isEmpty()) {
+                sb.append("\n  ").append(type.name().charAt(0)).append(type.name().substring(1).toLowerCase()).append(": ").append(String.join(", ", names));
+            }
+        }
 
         return sb.toString();
     }

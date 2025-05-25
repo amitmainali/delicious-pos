@@ -3,6 +3,8 @@ package com.delicious.ui;
 import com.delicious.model.*;
 import com.delicious.model.enums.BreadType;
 import com.delicious.model.enums.Size;
+import com.delicious.model.enums.ToppingType;
+import com.delicious.utils.ToppingCatalog;
 
 import java.util.Scanner;
 
@@ -79,34 +81,26 @@ public class UserInterface {
 
         Sandwich sandwich = new Sandwich(size, bread, toasted);
 
-        System.out.println("Enter meats (comma-separated or leave blank): ");
-        String meats = scanner.nextLine().trim();
-        for (String meat : meats.split(",")) {
-            if (!meat.isBlank()) sandwich.addMeat(meat.trim());
+        System.out.println("\nAvailable toppings:");
+        for (String name : ToppingCatalog.getAllToppings().keySet()) {
+            System.out.println(" - " + name);
         }
 
-        System.out.println("Enter cheeses (comma-separated or leave blank): ");
-        String cheeses = scanner.nextLine().trim();
-        for (String cheese : cheeses.split(",")) {
-            if (!cheese.isBlank()) sandwich.addCheese(cheese.trim());
-        }
+        boolean addingToppings = true;
+        while (addingToppings) {
+            System.out.print("\nEnter a topping from the list (or type 'done'): ");
+            String input = scanner.nextLine().trim().toLowerCase();
 
-        System.out.println("Enter regular toppings (comma-separated or leave blank): ");
-        String toppings = scanner.nextLine().trim();
-        for (String topping : toppings.split(",")) {
-            if (!topping.isBlank()) sandwich.addRegularTopping(topping.trim());
-        }
-
-        System.out.println("Enter sauces (comma-separated or leave blank): ");
-        String sauces = scanner.nextLine().trim();
-        for (String sauce : sauces.split(",")) {
-            if (!sauce.isBlank()) sandwich.addSauce(sauce.trim());
-        }
-
-        System.out.println("Enter sides (comma-separated or leave blank): ");
-        String sides = scanner.nextLine().trim();
-        for (String side : sides.split(",")) {
-            if (!side.isBlank()) sandwich.addSide(side.trim());
+            if (input.equals("done")) {
+                addingToppings = false;
+            } else if (ToppingCatalog.isValidTopping(input)) {
+                ToppingType type = ToppingCatalog.getToppingType(input);
+                System.out.print("Is this an extra topping? (yes/no): ");
+                boolean isExtra = scanner.nextLine().trim().equalsIgnoreCase("yes");
+                sandwich.addTopping(new Topping(input, type, isExtra));
+            } else {
+                System.out.println("Invalid topping. Please choose from the list.");
+            }
         }
 
         return sandwich;
