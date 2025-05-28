@@ -86,4 +86,8 @@ public class Sandwich implements OrderItem {
 
         return sb.toString();
     }
+
+    public List <Topping> getToppings() {
+        return toppings;
+    }
 }

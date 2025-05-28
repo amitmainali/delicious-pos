@@ -11,50 +11,67 @@ public class ToppingCatalog {
     private static Map<String, ToppingType> initializeMap() {
         Map<String, ToppingType> map = new TreeMap<>();
 
-        map.put("steak", ToppingType.MEAT);
-        map.put("ham", ToppingType.MEAT);
-        map.put("salami", ToppingType.MEAT);
-        map.put("roast beef", ToppingType.MEAT);
-        map.put("chicken", ToppingType.MEAT);
-        map.put("bacon", ToppingType.MEAT);
+        // Meats
+        map.put("Steak", ToppingType.MEAT);
+        map.put("Ham", ToppingType.MEAT);
+        map.put("Salami", ToppingType.MEAT);
+        map.put("Roast Beef", ToppingType.MEAT);
+        map.put("Chicken", ToppingType.MEAT);
+        map.put("Bacon", ToppingType.MEAT);
 
-        map.put("american", ToppingType.CHEESE);
-        map.put("provolone", ToppingType.CHEESE);
-        map.put("cheddar", ToppingType.CHEESE);
-        map.put("swiss", ToppingType.CHEESE);
+        // Cheeses
+        map.put("American", ToppingType.CHEESE);
+        map.put("Provolone", ToppingType.CHEESE);
+        map.put("Cheddar", ToppingType.CHEESE);
+        map.put("Swiss", ToppingType.CHEESE);
 
-        map.put("lettuce", ToppingType.REGULAR);
-        map.put("peppers", ToppingType.REGULAR);
-        map.put("onions", ToppingType.REGULAR);
-        map.put("tomatoes", ToppingType.REGULAR);
-        map.put("jalapeÃ±os", ToppingType.REGULAR);
-        map.put("cucumbers", ToppingType.REGULAR);
-        map.put("pickles", ToppingType.REGULAR);
-        map.put("guacamole", ToppingType.REGULAR);
-        map.put("mushrooms", ToppingType.REGULAR);
+        // Regular Toppings
+        map.put("Lettuce", ToppingType.REGULAR);
+        map.put("Peppers", ToppingType.REGULAR);
+        map.put("Onions", ToppingType.REGULAR);
+        map.put("Tomatoes", ToppingType.REGULAR);
+        map.put("Jalapenos", ToppingType.REGULAR);
+        map.put("Cucumbers", ToppingType.REGULAR);
+        map.put("Pickles", ToppingType.REGULAR);
+        map.put("Guacamole", ToppingType.REGULAR);
+        map.put("Mushrooms", ToppingType.REGULAR);
 
-        map.put("mayo", ToppingType.SAUCE);
-        map.put("mustard", ToppingType.SAUCE);
-        map.put("ketchup", ToppingType.SAUCE);
-        map.put("ranch", ToppingType.SAUCE);
-        map.put("thousand islands", ToppingType.SAUCE);
-        map.put("vinaigrette", ToppingType.SAUCE);
+        // Sauces
+        map.put("Mayo", ToppingType.SAUCE);
+        map.put("Mustard", ToppingType.SAUCE);
+        map.put("Ketchup", ToppingType.SAUCE);
+        map.put("Ranch", ToppingType.SAUCE);
+        map.put("Thousand Islands", ToppingType.SAUCE);
+        map.put("Vinaigrette", ToppingType.SAUCE);
 
-        map.put("au jus", ToppingType.SIDE);
-        map.put("sauce", ToppingType.SIDE);
+        // Sides
+        map.put("Au Jus", ToppingType.SIDE);
+        map.put("Sauce", ToppingType.SIDE);
 
         return map;
     }
 
     public static boolean isValidTopping(String name) {
-        return toppingMap.containsKey(name.toLowerCase());
+        return toppingMap.containsKey(normalize(name));
     }
 
     public static ToppingType getToppingType(String name) {
-        return toppingMap.get(name.toLowerCase());
+        return toppingMap.get(normalize(name));
     }
 
     public static Map<String, ToppingType> getAllToppings() {
         return toppingMap;
+    }
+
+    private static String normalize(String input) {
+        String[] parts = input.trim().toLowerCase().split(" ");
+        StringBuilder sb = new StringBuilder();
+        for (String word : parts) {
+            if (!word.isEmpty()) {
+                sb.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1)).append(" ");
+            }
+        }
+        return sb.toString().trim();
     }
 }
