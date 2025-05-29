@@ -1,36 +1,36 @@
 package com.delicious.ui;
 
+import com.delicious.data.ReceiptWriter;
 import com.delicious.model.*;
 import com.delicious.model.enums.BreadType;
 import com.delicious.model.enums.Size;
-import com.delicious.model.enums.ToppingType;
+import com.delicious.model.signature.SignatureSandwich;
+import com.delicious.model.signature.SignatureSandwiches;
+import com.delicious.utils.InputUtils;
+import com.delicious.utils.MenuUtils;
 import com.delicious.utils.ToppingCatalog;
 
 import java.util.*;
 
 public class UserInterface {
-    private Scanner scanner;
+    private final Scanner scanner;
 
     public UserInterface() {
-        scanner = new Scanner(System.in);
+        this.scanner = new Scanner(System.in);
     }
 
     public void start() {
-        boolean running = true;
-
-        while (running) {
-            System.out.println("\n".repeat(20));
-            System.out.println("========================== Home Screen ==========================");
+        while (true) {
+            MenuUtils.printHeader("Home Screen");
             System.out.println("\t1) New Order");
             System.out.println("\t0) Exit");
             System.out.print("\nEnter your choice: ");
             String choice = scanner.nextLine();
-
             switch (choice) {
                 case "1" -> handleNewOrder();
                 case "0" -> {
                     System.out.println("Exiting application...");
-                    running = false;
+                    return;
                 }
                 default -> System.out.println("Invalid option. Try again.");
             }
@@ -42,31 +42,33 @@ public class UserInterface {
         boolean ordering = true;
 
         while (ordering) {
-            System.out.println("\n".repeat(20));
-            System.out.println("========================= Order Menu =========================");
+            MenuUtils.printHeader("Order Menu");
             System.out.println("\t1) Add Sandwich");
-            System.out.println("\t2) Add Drink");
-            System.out.println("\t3) Add Chips");
-            System.out.println("\t4) Checkout");
+            System.out.println("\t2) Add Signature Sandwich");
+            System.out.println("\t3) Add Drink");
+            System.out.println("\t4) Add Chips");
+            System.out.println("\t5) Checkout");
             System.out.println("\t0) Cancel Order");
             System.out.print("\nEnter your choice: ");
-            String choice = scanner.nextLine();
 
+            String choice = scanner.nextLine();
             switch (choice) {
                 case "1" -> order.addItem(buildSandwich());
-                case "2" -> order.addItem(buildDrink());
-                case "3" -> order.addItem(buildChip());
-                case "4" -> {
-                    System.out.println("\n".repeat(20));
-                    System.out.println("======================== Order Summary =========================");
+                case "2" -> order.addItem(selectSignature());
+                case "3" -> order.addItem(buildDrink());
+                case "4" -> order.addItem(buildChip());
+                case "5" -> {
+                    MenuUtils.printHeader("Order Summary");
                     System.out.println(order.buildOrderSummary());
+                    ReceiptWriter.write(order);
+
                     System.out.print("\nPress ENTER to return to the main menu...");
                     scanner.nextLine();
                     ordering = false;
                 }
                 case "0" -> {
                     System.out.println("Order cancelled.");
-                    ordering = false;
+                    return;
                 }
                 default -> System.out.println("Invalid option. Try again.");
             }
@@ -74,176 +76,50 @@ public class UserInterface {
     }
 
     private Sandwich buildSandwich() {
-        BreadType bread = promptForBreadType();
-        Size size = promptForSandwichSize();
-
-        System.out.println("\n".repeat(20));
-        System.out.println("====================== Toasted Option =========================");
-        System.out.print("Toasted? (yes/no): ");
-        boolean toasted = scanner.nextLine().trim().equalsIgnoreCase("yes");
-
+        BreadType bread = InputUtils.promptBreadType(scanner);
+        Size size = InputUtils.promptSandwichSize(scanner);
+        boolean toasted = InputUtils.promptYesNo(scanner, "Toasted? (yes/no): ");
         Sandwich sandwich = new Sandwich(size, bread, toasted);
-        List<String> addedToppings = new ArrayList<>();
+        return InputUtils.customizeSandwich(scanner, sandwich);
+    }
 
-        Map<ToppingType, List<String>> categorized = new LinkedHashMap<>();
-        for (ToppingType type : ToppingType.values()) categorized.put(type, new ArrayList<>());
-
-        for (Map.Entry<String, ToppingType> entry : ToppingCatalog.getAllToppings().entrySet()) {
-            categorized.get(entry.getValue()).add(entry.getKey());
+    private Sandwich selectSignature() {
+        List<SignatureSandwich> list = SignatureSandwiches.getAll();
+        MenuUtils.printHeader("Signature Sandwich Menu");
+        for (int i = 0; i < list.size(); i++) {
+            System.out.printf("\t%d) %s - $%.2f\n", i + 1, list.get(i).getName(), list.get(i).getPrice());
         }
+        System.out.print("\nEnter your choice: ");
 
-        int maxRows = categorized.values().stream().mapToInt(List::size).max().orElse(0);
-        List<ToppingType> types = new ArrayList<>(categorized.keySet());
-
-        boolean addingToppings = true;
-        while (addingToppings) {
-            System.out.println("\n".repeat(20));
-            System.out.println("================================== Topping Selection ===================================");
-            for (ToppingType type : types) {
-                System.out.printf("%-20s", type.name().charAt(0) + type.name().substring(1).toLowerCase());
-            }
-            System.out.println();
-            System.out.println("----------------------------------------------------------------------------------------");
-
-            for (int row = 0; row < maxRows; row++) {
-                for (ToppingType type : types) {
-                    List<String> items = categorized.get(type);
-                    String value = row < items.size() ? items.get(row) : "";
-                    System.out.printf("%-20s", value);
+        while (true) {
+            try {
+                int i = Integer.parseInt(scanner.nextLine().trim()) - 1;
+                if (i >= 0 && i < list.size()) {
+                    SignatureSandwich sig = list.get(i);
+                    Sandwich copy = new Sandwich(sig.getSize(), sig.getBreadType(), sig.isToasted());
+                    copy.setCustomName(sig.getName());
+                    sig.getToppings().forEach(copy::addTopping);
+                    if (InputUtils.promptYesNo(scanner, "\nWould you like to customize this sandwich? (yes/no): ")) {
+                        return InputUtils.customizeSandwich(scanner, copy);
+                    }
+                    return copy;
                 }
-                System.out.println();
+            } catch (NumberFormatException ignored) {
             }
-            System.out.println();
-
-            if (!addedToppings.isEmpty()) {
-                System.out.println("\nToppings added: " + String.join(", ", addedToppings));
-            }
-
-            System.out.print("Enter a topping from the list (or type 'done'): ");
-            String input = scanner.nextLine().trim();
-
-            if (input.equalsIgnoreCase("done")) {
-                addingToppings = false;
-            } else if (ToppingCatalog.isValidTopping(input)) {
-                String normalizedName = ToppingCatalog.getAllToppings()
-                        .keySet().stream()
-                        .filter(key -> key.equalsIgnoreCase(input))
-                        .findFirst()
-                        .orElse(input);
-
-                ToppingType type = ToppingCatalog.getToppingType(input);
-                System.out.print("Mark this as an extra portion? (yes/no): ");
-                boolean isExtra = scanner.nextLine().trim().equalsIgnoreCase("yes");
-                sandwich.addTopping(new Topping(normalizedName, type, isExtra));
-                addedToppings.add(normalizedName + (isExtra ? " (extra)" : ""));
-            } else {
-                System.out.println("Invalid topping. Please choose from the list.");
-                System.out.print("Press ENTER to continue...");
-                scanner.nextLine();
-            }
+            System.out.print("Invalid input. Try again: ");
         }
-
-        return sandwich;
     }
 
     private Drink buildDrink() {
-        Size size = promptForDrinkSize();
-
-        System.out.println("\n".repeat(20));
-        System.out.println("========================= Drink Entry ==========================");
+        Size size = InputUtils.promptDrinkSize(scanner);
+        MenuUtils.printHeader("Drink Entry");
         System.out.print("Enter drink flavor: ");
-        String flavor = scanner.nextLine().trim();
-
-        return new Drink(size, flavor);
+        return new Drink(size, scanner.nextLine().trim());
     }
 
     private Chip buildChip() {
-        System.out.println("\n".repeat(20));
-        System.out.println("========================== Chip Entry ==========================");
+        MenuUtils.printHeader("Chip Entry");
         System.out.print("Enter chip type: ");
-        String type = scanner.nextLine().trim();
-
-        return new Chip(type);
-    }
-
-    private BreadType promptForBreadType() {
-        System.out.println("\n".repeat(20));
-        System.out.println("======================== Bread Selection ========================");
-        BreadType[] options = BreadType.values();
-        for (int i = 0; i < options.length; i++) {
-            System.out.printf("\t%d) %s\n", i + 1, capitalize(options[i].name()));
-        }
-        System.out.print("\nEnter your choice: ");
-
-        while (true) {
-            String input = scanner.nextLine().trim().toUpperCase();
-
-            try {
-                int index = Integer.parseInt(input) - 1;
-                if (index >= 0 && index < options.length) return options[index];
-            } catch (NumberFormatException ignored) {
-                for (BreadType type : options) {
-                    if (type.name().equalsIgnoreCase(input)) return type;
-                }
-            }
-
-            System.out.println("Invalid input. Try again.");
-        }
-    }
-
-    private Size promptForSandwichSize() {
-        System.out.println("\n".repeat(20));
-        System.out.println("======================= Sandwich Size ==========================");
-        System.out.println("\t1) 4\" (four)");
-        System.out.println("\t2) 8\" (eight)");
-        System.out.println("\t3) 12\" (twelve)");
-        System.out.print("\nEnter your choice: ");
-
-        while (true) {
-            String input = scanner.nextLine().trim().toLowerCase();
-
-            switch (input) {
-                case "1", "4", "four", "4\"" -> {
-                    return Size.FOUR_INCH;
-                }
-                case "2", "8", "eight", "8\"" -> {
-                    return Size.EIGHT_INCH;
-                }
-                case "3", "12", "twelve", "12\"" -> {
-                    return Size.TWELVE_INCH;
-                }
-                default -> System.out.println("Invalid input. Try again.");
-            }
-        }
-    }
-
-    private Size promptForDrinkSize() {
-        System.out.println("\n".repeat(20));
-        System.out.println("========================= Drink Size ===========================");
-        System.out.println("\t1) Small");
-        System.out.println("\t2) Medium");
-        System.out.println("\t3) Large");
-        System.out.print("\nEnter your choice: ");
-
-        while (true) {
-            String input = scanner.nextLine().trim().toLowerCase();
-
-            switch (input) {
-                case "1", "small" -> {
-                    return Size.SMALL;
-                }
-                case "2", "medium" -> {
-                    return Size.MEDIUM;
-                }
-                case "3", "large" -> {
-                    return Size.LARGE;
-                }
-                default -> System.out.println("Invalid input. Try again.\n");
-            }
-        }
-    }
-
-    private String capitalize(String text) {
-        return text.charAt(0) + text.substring(1).toLowerCase();
+        return new Chip(scanner.nextLine().trim());
     }
 }

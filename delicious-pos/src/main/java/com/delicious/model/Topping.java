@@ -3,9 +3,9 @@ package com.delicious.model;
 import com.delicious.model.enums.ToppingType;
 
 public class Topping {
-    private String name;
-    private ToppingType type;
-    private boolean isExtra;
+    private final String name;
+    private final ToppingType type;
+    private final boolean isExtra;
 
     public Topping(String name, ToppingType type, boolean isExtra) {
         this.name = name;

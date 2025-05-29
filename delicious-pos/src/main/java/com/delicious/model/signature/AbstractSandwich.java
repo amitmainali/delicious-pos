@@ -1,4 +1,15 @@
 package com.delicious.model.signature;
 
-public class AbstractSandwich {
+import com.delicious.model.OrderItem;
+
+public abstract class AbstractSandwich implements OrderItem {
+    private final String name;
+
+    protected AbstractSandwich(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

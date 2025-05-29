@@ -8,20 +8,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Sandwich implements OrderItem {
-    private Size size;
-    private BreadType breadType;
-    private boolean toasted;
-    private List<Topping> toppings;
+    private final Size size;
+    private final BreadType breadType;
+    private final boolean toasted;
+    private final List<Topping> toppings = new ArrayList<>();
+    private String customName;
 
     public Sandwich(Size size, BreadType breadType, boolean toasted) {
         this.size = size;
         this.breadType = breadType;
         this.toasted = toasted;
-        this.toppings = new ArrayList<>();
     }
 
     public void addTopping(Topping topping) {
         toppings.add(topping);
+    }
+
+    public void setCustomName(String customName) {
+        this.customName = customName;
     }
 
     @Override
@@ -60,13 +64,19 @@ public class Sandwich implements OrderItem {
     @Override
     public String getDescription() {
         StringBuilder sb = new StringBuilder();
+
         sb.append(switch (size) {
             case FOUR_INCH -> "4\"";
             case EIGHT_INCH -> "8\"";
             case TWELVE_INCH -> "12\"";
             default -> "";
-        });
-        sb.append(" ").append(breadType.name().charAt(0)).append(breadType.name().substring(1).toLowerCase()).append(" Sandwich");
+        }).append(" ");
+
+        if (customName != null) {
+            sb.append(customName);
+        } else {
+            sb.append(capitalize(breadType.name())).append(" Sandwich");
+        }
 
         if (toasted) sb.append(" (Toasted)");
 
@@ -80,14 +90,30 @@ public class Sandwich implements OrderItem {
                 }
             }
             if (!names.isEmpty()) {
-                sb.append("\n  ").append(type.name().charAt(0)).append(type.name().substring(1).toLowerCase()).append(": ").append(String.join(", ", names));
+                sb.append("\n  ").append(capitalize(type.name())).append(": ").append(String.join(", ", names));
             }
         }
 
         return sb.toString();
     }
 
-    public List <Topping> getToppings() {
+    private String capitalize(String word) {
+        return word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase();
+    }
+
+    public Size getSize() {
+        return size;
+    }
+
+    public BreadType getBreadType() {
+        return breadType;
+    }
+
+    public boolean isToasted() {
+        return toasted;
+    }
+
+    public List<Topping> getToppings() {
         return toppings;
     }
 }

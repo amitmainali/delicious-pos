@@ -2,17 +2,10 @@ package com.delicious.model;
 
 import com.delicious.model.enums.ToppingType;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Order {
-    private List<OrderItem> items;
-
-    public Order() {
-        this.items = new ArrayList<>();
-    }
+    private final List<OrderItem> items = new ArrayList<>();
 
     public void addItem(OrderItem item) {
         items.add(item);
@@ -40,8 +33,7 @@ public class Order {
                 double price = sandwich.getPrice();
 
                 sb.append(String.format("%-4d %-6s %-40s $%5.2f\n", 1, size, label, price));
-
-                String indent = "                "; // 11 spaces = 4 (Qty) + 1 + 6 (Size)
+                String indent = "                ";
 
                 Map<ToppingType, List<String>> grouped = new LinkedHashMap<>();
                 for (ToppingType type : ToppingType.values()) grouped.put(type, new ArrayList<>());
@@ -59,7 +51,6 @@ public class Order {
                                 capitalize(type.name()), String.join(", ", items)));
                     }
                 }
-
             } else {
                 String desc = item.getDescription().replace("\n", " ").trim();
                 String size = extractSizeFromDescription(desc);

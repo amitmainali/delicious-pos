@@ -3,8 +3,8 @@ package com.delicious.model;
 import com.delicious.model.enums.Size;
 
 public class Drink implements OrderItem {
-    private Size size;
-    private String flavor;
+    private final Size size;
+    private final String flavor;
 
     public Drink(Size size, String flavor) {
         this.size = size;
@@ -23,10 +23,10 @@ public class Drink implements OrderItem {
 
     @Override
     public String getDescription() {
-        return String.format("%s Drink - %s", formatSize(size), flavor);
+        return String.format("%s Drink - %s", formatSize(), flavor);
     }
 
-    private String formatSize(Size size) {
+    private String formatSize() {
         return switch (size) {
             case SMALL -> "Small";
             case MEDIUM -> "Medium";

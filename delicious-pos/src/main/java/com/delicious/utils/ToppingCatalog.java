@@ -2,65 +2,69 @@ package com.delicious.utils;
 
 import com.delicious.model.enums.ToppingType;
 
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 public class ToppingCatalog {
-    private static final Map<String, ToppingType> toppingMap = initializeMap();
+    private static final Map<String, ToppingType> TOPPING_MAP = new TreeMap<>();
 
-    private static Map<String, ToppingType> initializeMap() {
-        Map<String, ToppingType> map = new TreeMap<>();
+    static {
+        add("Steak", ToppingType.MEAT);
+        add("Ham", ToppingType.MEAT);
+        add("Salami", ToppingType.MEAT);
+        add("Roast Beef", ToppingType.MEAT);
+        add("Chicken", ToppingType.MEAT);
+        add("Bacon", ToppingType.MEAT);
 
-        // Meats
-        map.put("Steak", ToppingType.MEAT);
-        map.put("Ham", ToppingType.MEAT);
-        map.put("Salami", ToppingType.MEAT);
-        map.put("Roast Beef", ToppingType.MEAT);
-        map.put("Chicken", ToppingType.MEAT);
-        map.put("Bacon", ToppingType.MEAT);
+        add("American", ToppingType.CHEESE);
+        add("Provolone", ToppingType.CHEESE);
+        add("Cheddar", ToppingType.CHEESE);
+        add("Swiss", ToppingType.CHEESE);
+        add("Mozzarella", ToppingType.CHEESE);
 
-        // Cheeses
-        map.put("American", ToppingType.CHEESE);
-        map.put("Provolone", ToppingType.CHEESE);
-        map.put("Cheddar", ToppingType.CHEESE);
-        map.put("Swiss", ToppingType.CHEESE);
+        add("Lettuce", ToppingType.REGULAR);
+        add("Peppers", ToppingType.REGULAR);
+        add("Onions", ToppingType.REGULAR);
+        add("Tomatoes", ToppingType.REGULAR);
+        add("Jalapenos", ToppingType.REGULAR);
+        add("Cucumbers", ToppingType.REGULAR);
+        add("Pickles", ToppingType.REGULAR);
+        add("Guacamole", ToppingType.REGULAR);
+        add("Mushrooms", ToppingType.REGULAR);
+        add("Banana Peppers", ToppingType.REGULAR);
 
-        // Regular Toppings
-        map.put("Lettuce", ToppingType.REGULAR);
-        map.put("Peppers", ToppingType.REGULAR);
-        map.put("Onions", ToppingType.REGULAR);
-        map.put("Tomatoes", ToppingType.REGULAR);
-        map.put("Jalapenos", ToppingType.REGULAR);
-        map.put("Cucumbers", ToppingType.REGULAR);
-        map.put("Pickles", ToppingType.REGULAR);
-        map.put("Guacamole", ToppingType.REGULAR);
-        map.put("Mushrooms", ToppingType.REGULAR);
+        add("Mayo", ToppingType.SAUCE);
+        add("Mustard", ToppingType.SAUCE);
+        add("Ketchup", ToppingType.SAUCE);
+        add("Ranch", ToppingType.SAUCE);
+        add("Thousand Islands", ToppingType.SAUCE);
+        add("Chipotle Mayo", ToppingType.SAUCE);
+        add("Vinaigrette", ToppingType.SAUCE);
 
-        // Sauces
-        map.put("Mayo", ToppingType.SAUCE);
-        map.put("Mustard", ToppingType.SAUCE);
-        map.put("Ketchup", ToppingType.SAUCE);
-        map.put("Ranch", ToppingType.SAUCE);
-        map.put("Thousand Islands", ToppingType.SAUCE);
-        map.put("Vinaigrette", ToppingType.SAUCE);
+        add("Au Jus", ToppingType.SIDE);
+        add("Sauce", ToppingType.SIDE);
+    }
 
-        // Sides
-        map.put("Au Jus", ToppingType.SIDE);
-        map.put("Sauce", ToppingType.SIDE);
-
-        return map;
+    private static void add(String name, ToppingType type) {
+        TOPPING_MAP.put(name, type);
     }
 
     public static boolean isValidTopping(String name) {
-        return toppingMap.containsKey(normalize(name));
+        return TOPPING_MAP.containsKey(normalize(name));
     }
 
     public static ToppingType getToppingType(String name) {
-        return toppingMap.get(normalize(name));
+        return TOPPING_MAP.get(normalize(name));
     }
 
     public static Map<String, ToppingType> getAllToppings() {
-        return toppingMap;
+        return TOPPING_MAP;
+    }
+
+    public static String getNormalizedTopping(String name) {
+        return TOPPING_MAP.keySet().stream()
+                .filter(k -> k.equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(name);
     }
 
     private static String normalize(String input) {

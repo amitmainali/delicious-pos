@@ -1,7 +1,7 @@
 package com.delicious.model;
 
 public class Chip implements OrderItem {
-    private String type;
+    private final String type;
 
     public Chip(String type) {
         this.type = type;
