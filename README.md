@@ -1,4 +1,4 @@
-# 🥪 Delicious POS
+# Delicious POS
 
 Delicious POS is a console-based point-of-sale system written in Java. It allows users to build custom sandwiches, select from a variety of signature subs, add drinks and chips, and generates detailed receipts — all within a streamlined, keyboard-driven interface.
 
